@@ -1,0 +1,207 @@
+
+ <script>
+ document.addEventListener("DOMContentLoaded", () => {
+    let printLink = document.getElementById("print");
+    let container = document.getElementById("d-print-block");
+
+    printLink.addEventListener("click", event => {
+        event.preventDefault();
+        window.print();
+    }, false);
+
+    container.addEventListener("click", event => {
+        printLink.style.display = "flex";
+    }, false);
+
+}, false);
+ </script>
+ <!-- generate report printable -->
+<div class="d-print-block d-none" id="d-print-block">
+  <div class="row">
+    <div class="col-lg-12" align="center">
+      <h4>Metal Core Daily Schedules</h4>
+      <p style="margin-top:-8px"><?= date('M d, Y ', time())?></p>
+    </div>
+  </div>
+  <?php
+    //get all active trainers
+    $dateToday = date('Y-m-d ', time());
+    $sql = "SELECT * FROM trainers WHERE t_status = 'active'";
+    $query = mysqli_query($db,$sql);
+    while($t = mysqli_fetch_array($query)){
+    $trainer_id = $t['trainer_id'];
+  ?>
+  <div class="row">
+    <div class="col-lg-12" >
+      <h5><?= ucfirst($t['t_first_name']).' '.ucfirst($t['t_last_name'])?></h5>
+      <?php
+        //get session first
+        $sqlSession = "SELECT * FROM sessions";
+        $querySession = mysqli_query($db,$sqlSession);
+      ?>
+      <p style="margin-top:-8px">Trainer</p>
+    </div>
+    <?php if(mysqli_num_rows($querySession) > 0){
+      while($se = mysqli_fetch_array($querySession)){
+      ?>
+        <div class="col-lg-12" >
+
+            <table class=" table table-bordered">
+              <thead>
+                <th colspan="5" style="color:black; font-size:13px">
+                  <?= $se['session_type']?>
+                </th>
+              </thead>
+              <tbody>
+                <tr style="font-weight:bold">
+                  <td class="wd-10p">#</td>
+                  <td class="wd-30p">Customer Name</td>
+                  <td class="wd-20p">Sex</td>
+                  <td class="wd-20p">Contact</td>
+                  <td class="wd-20p">Email Address</td>
+                </tr>
+                <?php
+                  //get customers for this session and trainer
+                  $session_id = $se['session_id'];
+                  $sqlSched = "SELECT *, T.t_status FROM schedules AS S, customers AS C, users AS U, trainers as T WHERE S.session_id = '$session_id' AND S.trainer_id = '$trainer_id'
+                  AND S.s_status = 'approved' AND s.schedule_date ='$dateToday' AND S.customer_id = C.customer_id AND U.user_id = C.user_id AND C.c_status = 'active' AND T.t_status = 'active' GROUP BY S.schedule_id";
+                  $querySched = mysqli_query($db,$sqlSched);
+                  $x = 1;
+                  if(mysqli_num_rows($querySched) > 0){
+                      while($s = mysqli_fetch_array($querySched)){ ?>
+
+                        <tr>
+                          <td><?= $x?></td>
+                          <td><?= ucfirst($s['c_first_name']).' '.ucfirst($s['c_last_name'])?></td>
+                          <td><?= ucfirst($s['c_sex'])?></td>
+                          <td>09<?= $s['contact']?></td>
+                          <td><?= $s['username']?></td>
+                        </tr>
+
+
+                      <?php
+                      $x++;
+                      }
+                  } else {
+                    echo "<tr><td colspan='5'>No customer schedule found.</td></tr>";
+                  }
+                ?>
+              </tbody>
+            </table>
+        </div>
+    <?php
+    }
+    echo "<hr>";
+      } else {
+        echo '<div class="col-lg-12"><div class="alert alert-outline-danger">No session found.</div></div>';
+      }
+    ?>
+  </div>
+  <?php
+} ?>
+</div>
+
+ <div class="az-content az-content-dashboard d-print-none">
+   <div class="container">
+     <div class="az-content-body">
+       <div class="az-dashboard-one-title">
+         <div>
+           <h2 class="az-dashboard-title">Hi <?= $_SESSION['name']?>, welcome back!</h2>
+           <p class="az-dashboard-text">Your web analytics dashboard template.</p>
+         </div>
+         <div class="az-content-header-right">
+           <a id="print" class="btn btn-purple">Generate Report</a>
+         </div>
+       </div><!-- az-dashboard-one-title -->
+       <div class="" id="d-print-block">
+  <div class="row">
+    <div class="col-lg-12" align="center">
+      <h4>Metal Core Daily Schedules</h4>
+      <p style="margin-top:-8px"><?= date('M d, Y ', time())?></p>
+    </div>
+  </div>
+  <?php
+    //get all active trainers
+    $dateToday = date('Y-m-d ', time());
+    $sql = "SELECT * FROM trainers WHERE t_status = 'active'";
+    $query = mysqli_query($db,$sql);
+    while($t = mysqli_fetch_array($query)){
+    $trainer_id = $t['trainer_id'];
+  ?>
+  <div class="row">
+    <div class="col-lg-12" >
+      <h5><?= ucfirst($t['t_first_name']).' '.ucfirst($t['t_last_name'])?></h5>
+      <?php
+        //get session first
+        $sqlSession = "SELECT * FROM sessions";
+        $querySession = mysqli_query($db,$sqlSession);
+      ?>
+      <p style="margin-top:-8px">Trainer</p>
+    </div>
+    <?php if(mysqli_num_rows($querySession) > 0){
+      while($se = mysqli_fetch_array($querySession)){
+      ?>
+        <div class="col-lg-12" >
+
+            <table class=" table table-bordered">
+              <thead>
+                <th colspan="5" style="color:black; font-size:13px">
+                  <?= $se['session_type']?>
+                </th>
+              </thead>
+              <tbody>
+                <tr style="font-weight:bold">
+                  <td class="wd-10p">#</td>
+                  <td class="wd-30p">Customer Name</td>
+                  <td class="wd-20p">Sex</td>
+                  <td class="wd-20p">Contact</td>
+                  <td class="wd-20p">Email Address</td>
+                </tr>
+                <?php
+                  //get customers for this session and trainer
+                  $session_id = $se['session_id'];
+                  $sqlSched = "SELECT *, T.t_status FROM schedules AS S, customers AS C, users AS U, trainers as T WHERE S.session_id = '$session_id' AND S.trainer_id = '$trainer_id'
+                  AND S.s_status = 'approved' AND s.schedule_date ='$dateToday' AND S.customer_id = C.customer_id AND U.user_id = C.user_id AND C.c_status = 'active' AND T.t_status = 'active' GROUP BY S.schedule_id";
+                  $querySched = mysqli_query($db,$sqlSched);
+                  $x = 1;
+                  if(mysqli_num_rows($querySched) > 0){
+                      while($s = mysqli_fetch_array($querySched)){ ?>
+
+                        <tr>
+                          <td><?= $x?></td>
+                          <td><?= ucfirst($s['c_first_name']).' '.ucfirst($s['c_last_name'])?></td>
+                          <td><?= ucfirst($s['c_sex'])?></td>
+                          <td>09<?= $s['contact']?></td>
+                          <td><?= $s['username']?></td>
+                        </tr>
+
+
+                      <?php
+                      $x++;
+                      }
+                  } else {
+                    echo "<tr><td colspan='5'>No customer schedule found.</td></tr>";
+                  }
+                ?>
+              </tbody>
+            </table>
+        </div>
+    <?php
+    }
+    echo "<hr>";
+      } else {
+        echo '<div class="col-lg-12"><div class="alert alert-outline-danger">No session found.</div></div>';
+      }
+    ?>
+  </div>
+  <?php
+} ?>
+
+
+
+        </div><!-- az-content-body -->
+      </div>
+    </div><!-- az-content -->
+<?php
+include('adminFooter.php');
+?>
