@@ -6,60 +6,227 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Metal Core Booking System</title>
-    
+
     <!-- bootstrap 5 -->
     <link rel="stylesheet" href="./css/bootstrap.min.css">
-    
+
     <!-- font-awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.2.0/css/all.min.css">
-    
+
     <!-- custom css -->
     <link rel="stylesheet" href="./customCss/login.css">
     <link rel="stylesheet" href="./customCss/homepage.css">
+    <script src="js/jquery.min.js"></script>
+    <script>
+    //accept only numbers
+    function isNumberKey(evt){
+        var charCode = (evt.which) ? evt.which : evt.keyCode
+        if (charCode > 31 && (charCode < 48 || charCode > 57))
+            return false;
+        return true;
+    }
+    //accept only letters for names
+    function isName(event){
+      var regex = new RegExp("^[a-zA-Z]+$");
+      var key = String.fromCharCode(!event.charCode ? event.which : event.charCode);
+      if (!regex.test(key)) {
+         event.preventDefault();
+         return false;
+      }
+    }
+
+    //check email if already registered in db
+    function check_email(){
+      // Get some values from elements on the page:
+      var email = $("#InputEmail1").val();
+      if (email != ""){
+        $.post("jqueryChecker.php",
+          {
+            e: email,
+          },
+          function(data){
+            if(data == "true"){
+              $( "#InputEmail1" ).removeClass( "is-valid" ).addClass( "is-invalid" );
+              $( ".e-msg" ).removeClass( "d-none" );
+            } else {
+              $( "#InputEmail1" ).removeClass( "is-invalid" ).addClass( "is-valid" );
+              $( ".e-msg" ).addClass( "d-none" );
+            }
+            fieldChecker();
+          });
+      } else {
+        $( "#InputEmail1" ).removeClass("is-valid is-invalid");
+        $( ".e-msg" ).addClass( "d-none" );
+      }
+    }
+    //check contact if already registered in db
+    function check_contact(){
+      // Get some values from elements on the page:
+      var contact = $("#InputContact").val();
+      if (contact != ""){
+        $.post("jqueryChecker.php",
+          {
+            c: contact,
+          },
+          function(data){
+            if(data == "true"){
+              $( "#InputContact" ).removeClass( "is-valid" ).addClass( "is-invalid" );
+              $( ".c-msg" ).removeClass( "d-none" );
+            } else {
+              $( "#InputContact" ).removeClass( "is-invalid" ).addClass( "is-valid" );
+              $( ".c-msg" ).addClass( "d-none" );
+            }
+            fieldChecker();
+          });
+      } else{
+        $( "#InputContact" ).removeClass("is-valid is-invalid");
+        $( ".c-msg" ).addClass( "d-none" );
+      }
+    }
+    //function that checks the email and contact fields are invalidd
+    function fieldChecker(){
+      if( $( "#InputEmail1" ).hasClass("is-invalid") || $( "#InputContact" ).hasClass("is-invalid") || $( "#InputPassword1" ).hasClass("is-invalid") || $( "#InputPassword2" ).hasClass("is-invalid") ){
+        //disable submit button
+        $( "#submit" ).prop( "disabled", true );
+      } else {
+        //enable submit button
+        $( "#submit" ).prop( "disabled", false );
+      }
+    }
+    //function if password and confirm password matched
+    function matchPassword(){
+      var password = $("#InputPassword1").val();
+      var cpassword = $("#InputPassword2").val();
+
+        if(password != '' && cpassword != ''){
+          if(password.length > 7 && cpassword.length > 7){
+            $( ".p-l-msg" ).addClass( "d-none" );
+          if( password != cpassword){
+            $("#InputPassword2, #InputPassword1").removeClass( "is-valid" ).addClass( "is-invalid" );
+            $( ".p-msg" ).removeClass( "d-none" );
+          } else {
+            $("#InputPassword2, #InputPassword1").removeClass( "is-invalid" ).addClass( "is-valid" );
+            $( ".p-msg" ).addClass( "d-none" );
+          }
+          fieldChecker();
+        } else {
+          $( ".p-msg" ).addClass( "d-none" );
+          $("#InputPassword2, #InputPassword1").removeClass( "is-valid" ).addClass( "is-invalid" );
+          $( ".p-l-msg" ).removeClass( "d-none" );
+
+        }
+      }
+
+    }
+
+    </script>
 </head>
+
 <body id="override">
-    
+
     <!-- navbar start -->
     <nav class="navbar fixed-top navbar-expand-lg navbar-light bg-light">
         <div class="container-fluid">
-            <a class="navbar-brand" href="./index.html"><i class="fas fa-regular fa-dumbbell"></i>Metal Core</a>
+            <a class="navbar-brand" href="./index.php"><i class="fas fa-regular fa-dumbbell"></i>Metal Core</a>
         </div>
     </nav>
     <!-- navbar end -->
-    
-    
+
     <section id="intro">
-        <div class="container-fluid">
-            <div class="row justify-content-center align-items-center">
-                <div class="col-md-5">
-                    <img class="img-fluid" src="./svg/undraw_sign_in_re_o58h.svg" alt="undraw_sign_in_re_o58h">
+        <div class="container-fluid" >
+            <div class="row d-flex justify-content-center">
+                <div class="d-flex justify-content-center" style="margin-top:-100px">
+                    <img class="img-fluid" src="./svg/undraw_personal_info_re_ur1n.svg" alt="undraw_sign_in_re_o58h">
                 </div>
-                <div class="col-md-4">
-                    <div class="text-center"><h1>Signup</h1></div>
+
+                <div class="text-center mb-5"><h1>Register</h1></div>
+                <div class="col-xl-5 col-lg-9" style="margin-top:-40px">
 
                     <!-- Form start -->
 
-                    <form action="./personalDetails.php" method="post">
+                    <form action="registerCustomer.php" method="post">
+                      <div class="mb-4">
+                        <label for="InputEmail1" class="form-label">Email address</label>
+                        <input type="email" name="username" class="form-control " id="InputEmail1" required aria-describedby="emailHelp" onfocusout="return check_email()">
+                        <span class="text-danger d-none e-msg">This email is already taken.</span>
+                        <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                      </div>
+                      <div class="mb-4">
+                        <label for="InputEmail1" class="form-label">Cell Phone Number</label>
+                          <div class="input-group">
+                            <span class="input-group-text" id="basic-addon1">+639</span>
+                            <input type="text" class="form-control" id="InputContact"  name="contact" aria-label="Contact Number" minlength="9" maxlength="9" aria-describedby="basic-addon1" required onkeypress="return isNumberKey(event)" onfocusout="return check_contact()">
+                          </div>
+                          <span class="text-danger d-none c-msg">This contact number is already taken.</span>
+                      </div>
 
-                            <div class="mb-4">
-                              <label for="InputEmail1" class="form-label">Email address</label>
-                              <input type="email" name="email" class="form-control" id="InputEmail1" required aria-describedby="emailHelp">
-                              <div id="emailHelp" class="form-text">We'll never share your email with anyone else.</div>
+                      <div class="mb-4">
+                          <label for="InputPassword1" class="form-label">Password</label>
+                          <input type="password" name="password" class="form-control" minlength="8" id="InputPassword1" onfocusout="return matchPassword()" required />
+                            <div id="pwHelp" class="form-text">Password must be 8 characters long.</div>
+                        </div>
+
+                      <div class="mb-4">
+                        <label for="InputPassword2" class="form-label">Confirm Password</label>
+                        <input type="password" name="confirm_password" class="form-control" minlength="8" id="InputPassword2" onfocusout="return matchPassword()" required />
+                        <span class="text-danger d-none p-msg">Password and confirm password did not match.</span>
+                        <span class="text-danger d-none p-l-msg">Password and confirm password must be at least 8 characters.</span>
+                      </div>
+                      <hr>
+                        <div class="mb-5">
+                            <label class="form-label">Your Name</label>
+
+                            <div class="input-group client1">
+
+                                <input type="text" name="fname" class="form-control name" id="fname" onkeypress="return isName(event)" placeholder="First Name" aria-label="inputLFirstName" required />
+
+                                <input type="text" name="lname" class="form-control name" id="lname" onkeypress="return isName(event)" placeholder="Last Name" aria-label="inputLastName" required />
+
                             </div>
 
-                            <div class="mb-4">
-                                <label for="InputPassword1" class="form-label">Password</label>
-                                <input type="password" name="password" class="form-control" id="InputPassword1" required />
-                              </div>
+                        </div>
 
-                            <div class="mb-4">
-                              <label for="InputPassword2" class="form-label">Confirm Password</label>
-                              <input type="password" name="password" class="form-control" id="InputPassword2" required />
+                        <div class="mb-5">
+                          <?php
+                           $dNow = date('Y-m-d', time());
+                           $allowedDate = date('Y-m-d', strtotime($dNow.' -15 year'));
+                           ?>
+                            <label for="birthDate" class="form-label">Birth Date</label>
+                            <input type="date" name="birthDate" class="form-control" id="birthDate" max="<?= $allowedDate?>" required />
+                        </div>
+
+                        <div class="mb-5">
+                            <label for="address" class="form-label">Address</label>
+                            <input type="text" name="address" class="form-control" id="address" placeholder="Home Address" required />
+                        </div>
+
+                        <label for="form-label">Sex</label>
+                        <div class="mb-5 d-flex justify-content-start">
+
+                            <div class="form-check pe-5">
+                                <input class="form-check-input" type="radio" name="sex" id="male" value="male" required>
+                                <label class="form-check-label" for="male">
+                                  Male
+                                </label>
                             </div>
-                            
-                            <div class="text-center mb-4">
-                                <button type="submit" name="submit" class="btn">Signup</button>
+
+                              <div class="form-check">
+                                <input class="form-check-input" type="radio" name="sex" id="male" value="female">
+                                <label class="form-check-label" for="female">
+                                  Female
+                                </label>
                             </div>
+
+                        </div>
+                        <div class="text-center mb-4">
+                            <button type="submit" name="submit" id="submit" class="btn btn-primary" style="width: 100%">Signup</button>
+                            <hr>
+                        </div>
+                        <div class="text-left mb-4">
+                          <span class="form-text">
+                          Already have an account? <a href="login.php" class="link-hover-blue ">Login Here</a></span><br><br><br></span>
+                        </div>
+
                     </form>
 
                     <!-- Form end -->
@@ -67,10 +234,13 @@
                 </div>
             </div>
         </div>
+
+            </div>
+        </div>
     </section>
-    
-    
-    
+
+
+
     <!-- script -->
     <script src="./js/bootstrap.bundle.js"></script>
 </body>
