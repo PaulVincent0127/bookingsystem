@@ -1,207 +1,244 @@
 
- <script>
- document.addEventListener("DOMContentLoaded", () => {
-    let printLink = document.getElementById("print");
-    let container = document.getElementById("d-print-block");
-
-    printLink.addEventListener("click", event => {
-        event.preventDefault();
-        window.print();
-    }, false);
-
-    container.addEventListener("click", event => {
-        printLink.style.display = "flex";
-    }, false);
-
-}, false);
- </script>
- <!-- generate report printable -->
-<div class="d-print-block d-none" id="d-print-block">
-  <div class="row">
-    <div class="col-lg-12" align="center">
-      <h4>Metal Core Daily Schedules</h4>
-      <p style="margin-top:-8px"><?= date('M d, Y ', time())?></p>
-    </div>
-  </div>
-  <?php
-    //get all active trainers
-    $dateToday = date('Y-m-d ', time());
-    $sql = "SELECT * FROM trainers WHERE t_status = 'active'";
-    $query = mysqli_query($db,$sql);
-    while($t = mysqli_fetch_array($query)){
-    $trainer_id = $t['trainer_id'];
-  ?>
-  <div class="row">
-    <div class="col-lg-12" >
-      <h5><?= ucfirst($t['t_first_name']).' '.ucfirst($t['t_last_name'])?></h5>
-      <?php
-        //get session first
-        $sqlSession = "SELECT * FROM sessions";
-        $querySession = mysqli_query($db,$sqlSession);
-      ?>
-      <p style="margin-top:-8px">Trainer</p>
-    </div>
-    <?php if(mysqli_num_rows($querySession) > 0){
-      while($se = mysqli_fetch_array($querySession)){
-      ?>
-        <div class="col-lg-12" >
-
-            <table class=" table table-bordered">
-              <thead>
-                <th colspan="5" style="color:black; font-size:13px">
-                  <?= $se['session_type']?>
-                </th>
-              </thead>
-              <tbody>
-                <tr style="font-weight:bold">
-                  <td class="wd-10p">#</td>
-                  <td class="wd-30p">Customer Name</td>
-                  <td class="wd-20p">Sex</td>
-                  <td class="wd-20p">Contact</td>
-                  <td class="wd-20p">Email Address</td>
-                </tr>
-                <?php
-                  //get customers for this session and trainer
-                  $session_id = $se['session_id'];
-                  $sqlSched = "SELECT *, T.t_status FROM schedules AS S, customers AS C, users AS U, trainers as T WHERE S.session_id = '$session_id' AND S.trainer_id = '$trainer_id'
-                  AND S.s_status = 'approved' AND s.schedule_date ='$dateToday' AND S.customer_id = C.customer_id AND U.user_id = C.user_id AND C.c_status = 'active' AND T.t_status = 'active' GROUP BY S.schedule_id";
-                  $querySched = mysqli_query($db,$sqlSched);
-                  $x = 1;
-                  if(mysqli_num_rows($querySched) > 0){
-                      while($s = mysqli_fetch_array($querySched)){ ?>
-
-                        <tr>
-                          <td><?= $x?></td>
-                          <td><?= ucfirst($s['c_first_name']).' '.ucfirst($s['c_last_name'])?></td>
-                          <td><?= ucfirst($s['c_sex'])?></td>
-                          <td>09<?= $s['contact']?></td>
-                          <td><?= $s['username']?></td>
-                        </tr>
+    <div class="az-footer ht-40">
+      <div class="container ht-100p pd-t-0-f">
+        <span class="text-muted d-block text-center text-sm-left d-sm-inline-block">Copyright © metalcore.com 2022</span>
+      </div><!-- container -->
+    </div><!-- az-footer -->
 
 
-                      <?php
-                      $x++;
-                      }
-                  } else {
-                    echo "<tr><td colspan='5'>No customer schedule found.</td></tr>";
-                  }
-                ?>
-              </tbody>
-            </table>
-        </div>
-    <?php
-    }
-    echo "<hr>";
-      } else {
-        echo '<div class="col-lg-12"><div class="alert alert-outline-danger">No session found.</div></div>';
-      }
-    ?>
-  </div>
-  <?php
-} ?>
-</div>
+    <script src="../AziaTemplate/lib/jquery/jquery.min.js"></script>
+    <script src="../AziaTemplate/lib/bootstrap/js/bootstrap.bundle.min.js"></script>
+    <script src="../AziaTemplate/lib/datatables.net/js/jquery.dataTables.min.js"></script>
+     <script src="../AziaTemplate/lib/datatables.net-dt/js/dataTables.dataTables.min.js"></script>
+     <script src="../AziaTemplate/lib/datatables.net-responsive/js/dataTables.responsive.min.js"></script>
+     <script src="../AziaTemplate/lib/datatables.net-responsive-dt/js/responsive.dataTables.min.js"></script>
+     <script src="../AziaTemplate/lib/select2/js/select2.min.js"></script>
+    <script src="../AziaTemplate/lib/ionicons/ionicons.js"></script>
+    <script src="../AziaTemplate/lib/jquery.flot/jquery.flot.js"></script>
+    <script src="../AziaTemplate/lib/jquery.flot/jquery.flot.resize.js"></script>
+    <script src="../AziaTemplate/lib/chart.js/Chart.bundle.min.js"></script>
+    <script src="../AziaTemplate/lib/peity/jquery.peity.min.js"></script>
 
- <div class="az-content az-content-dashboard d-print-none">
-   <div class="container">
-     <div class="az-content-body">
-       <div class="az-dashboard-one-title">
-         <div>
-           <h2 class="az-dashboard-title">Hi <?= $_SESSION['name']?>, welcome back!</h2>
-           <p class="az-dashboard-text">Your web analytics dashboard template.</p>
-         </div>
-         <div class="az-content-header-right">
-           <a id="print" class="btn btn-purple">Generate Report</a>
-         </div>
-       </div><!-- az-dashboard-one-title -->
-       <div class="" id="d-print-block">
-  <div class="row">
-    <div class="col-lg-12" align="center">
-      <h4>Metal Core Daily Schedules</h4>
-      <p style="margin-top:-8px"><?= date('M d, Y ', time())?></p>
-    </div>
-  </div>
-  <?php
-    //get all active trainers
-    $dateToday = date('Y-m-d ', time());
-    $sql = "SELECT * FROM trainers WHERE t_status = 'active'";
-    $query = mysqli_query($db,$sql);
-    while($t = mysqli_fetch_array($query)){
-    $trainer_id = $t['trainer_id'];
-  ?>
-  <div class="row">
-    <div class="col-lg-12" >
-      <h5><?= ucfirst($t['t_first_name']).' '.ucfirst($t['t_last_name'])?></h5>
-      <?php
-        //get session first
-        $sqlSession = "SELECT * FROM sessions";
-        $querySession = mysqli_query($db,$sqlSession);
-      ?>
-      <p style="margin-top:-8px">Trainer</p>
-    </div>
-    <?php if(mysqli_num_rows($querySession) > 0){
-      while($se = mysqli_fetch_array($querySession)){
-      ?>
-        <div class="col-lg-12" >
+    <script src="../AziaTemplate/js/azia.js"></script>
+    <script src="../AziaTemplate/js/chart.flot.sampledata.js"></script>
+    <script src="../AziaTemplate/js/dashboard.sampledata.js"></script>
+    <script src="../AziaTemplate/js/jquery.cookie.js" type="text/javascript"></script>
+    <script>
+      $(function(){
+        'use strict'
 
-            <table class=" table table-bordered">
-              <thead>
-                <th colspan="5" style="color:black; font-size:13px">
-                  <?= $se['session_type']?>
-                </th>
-              </thead>
-              <tbody>
-                <tr style="font-weight:bold">
-                  <td class="wd-10p">#</td>
-                  <td class="wd-30p">Customer Name</td>
-                  <td class="wd-20p">Sex</td>
-                  <td class="wd-20p">Contact</td>
-                  <td class="wd-20p">Email Address</td>
-                </tr>
-                <?php
-                  //get customers for this session and trainer
-                  $session_id = $se['session_id'];
-                  $sqlSched = "SELECT *, T.t_status FROM schedules AS S, customers AS C, users AS U, trainers as T WHERE S.session_id = '$session_id' AND S.trainer_id = '$trainer_id'
-                  AND S.s_status = 'approved' AND s.schedule_date ='$dateToday' AND S.customer_id = C.customer_id AND U.user_id = C.user_id AND C.c_status = 'active' AND T.t_status = 'active' GROUP BY S.schedule_id";
-                  $querySched = mysqli_query($db,$sqlSched);
-                  $x = 1;
-                  if(mysqli_num_rows($querySched) > 0){
-                      while($s = mysqli_fetch_array($querySched)){ ?>
+        var plot = $.plot('#flotChart', [{
+          data: flotSampleData3,
+          color: '#007bff',
+          lines: {
+            fillColor: { colors: [{ opacity: 0 }, { opacity: 0.2 }]}
+          }
+        },{
+          data: flotSampleData4,
+          color: '#560bd0',
+          lines: {
+            fillColor: { colors: [{ opacity: 0 }, { opacity: 0.2 }]}
+          }
+        }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 8
+          },
+          yaxis: {
+            show: true,
+            min: 0,
+            max: 100,
+            ticks: [[0,''],[20,'20K'],[40,'40K'],[60,'60K'],[80,'80K']],
+            tickColor: '#eee'
+          },
+          xaxis: {
+            show: true,
+            color: '#fff',
+            ticks: [[25,'OCT 21'],[75,'OCT 22'],[100,'OCT 23'],[125,'OCT 24']],
+          }
+        });
 
-                        <tr>
-                          <td><?= $x?></td>
-                          <td><?= ucfirst($s['c_first_name']).' '.ucfirst($s['c_last_name'])?></td>
-                          <td><?= ucfirst($s['c_sex'])?></td>
-                          <td>09<?= $s['contact']?></td>
-                          <td><?= $s['username']?></td>
-                        </tr>
+        $.plot('#flotChart1', [{
+          data: dashData2,
+          color: '#00cccc'
+        }], {
+          series: {
+            shadowSize: 0,
+            lines: {
+              show: true,
+              lineWidth: 2,
+              fill: true,
+              fillColor: { colors: [ { opacity: 0.2 }, { opacity: 0.2 } ] }
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 35
+          },
+          xaxis: {
+            show: false,
+            max: 50
+          }
+        });
 
-
-                      <?php
-                      $x++;
-                      }
-                  } else {
-                    echo "<tr><td colspan='5'>No customer schedule found.</td></tr>";
-                  }
-                ?>
-              </tbody>
-            </table>
-        </div>
-    <?php
-    }
-    echo "<hr>";
-      } else {
-        echo '<div class="col-lg-12"><div class="alert alert-outline-danger">No session found.</div></div>';
-      }
-    ?>
-  </div>
-  <?php
-} ?>
+        $.plot('#flotChart2', [{
+          data: dashData2,
+          color: '#007bff'
+        }], {
+          series: {
+            shadowSize: 0,
+            bars: {
+              show: true,
+              lineWidth: 0,
+              fill: 1,
+              barWidth: .5
+            }
+          },
+          grid: {
+            borderWidth: 0,
+            labelMargin: 0
+          },
+          yaxis: {
+            show: false,
+            min: 0,
+            max: 35
+          },
+          xaxis: {
+            show: false,
+            max: 20
+          }
+        });
 
 
+        //-------------------------------------------------------------//
 
-        </div><!-- az-content-body -->
-      </div>
-    </div><!-- az-content -->
-<?php
-include('adminFooter.php');
-?>
+
+        // Line chart
+        $('.peity-line').peity('line');
+
+        // Bar charts
+        $('.peity-bar').peity('bar');
+
+        // Bar charts
+        $('.peity-donut').peity('donut');
+
+        var ctx5 = document.getElementById('chartBar5').getContext('2d');
+        new Chart(ctx5, {
+          type: 'bar',
+          data: {
+            labels: [0,1,2,3,4,5,6,7],
+            datasets: [{
+              data: [2, 4, 10, 20, 45, 40, 35, 18],
+              backgroundColor: '#560bd0'
+            }, {
+              data: [3, 6, 15, 35, 50, 45, 35, 25],
+              backgroundColor: '#cad0e8'
+            }]
+          },
+          options: {
+            maintainAspectRatio: false,
+            tooltips: {
+              enabled: false
+            },
+            legend: {
+              display: false,
+                labels: {
+                  display: false
+                }
+            },
+            scales: {
+              yAxes: [{
+                display: false,
+                ticks: {
+                  beginAtZero:true,
+                  fontSize: 11,
+                  max: 80
+                }
+              }],
+              xAxes: [{
+                barPercentage: 0.6,
+                gridLines: {
+                  color: 'rgba(0,0,0,0.08)'
+                },
+                ticks: {
+                  beginAtZero:true,
+                  fontSize: 11,
+                  display: false
+                }
+              }]
+            }
+          }
+        });
+
+        // Donut Chart
+        var datapie = {
+          labels: ['Search', 'Email', 'Referral', 'Social', 'Other'],
+          datasets: [{
+            data: [25,20,30,15,10],
+            backgroundColor: ['#6f42c1', '#007bff','#17a2b8','#00cccc','#adb2bd']
+          }]
+        };
+
+        var optionpie = {
+          maintainAspectRatio: false,
+          responsive: true,
+          legend: {
+            display: false,
+          },
+          animation: {
+            animateScale: true,
+            animateRotate: true
+          }
+        };
+
+        // For a doughnut chart
+        var ctxpie= document.getElementById('chartDonut');
+        var myPieChart6 = new Chart(ctxpie, {
+          type: 'doughnut',
+          data: datapie,
+          options: optionpie
+        });
+
+      });
+
+     $(function(){
+       'use strict'
+
+       $('#dataTable1').DataTable({
+         language: {
+           searchPlaceholder: 'Search...',
+           sSearch: '',
+           lengthMenu: '_MENU_ items/page',
+         }
+       });
+
+       $('#dataTable2').DataTable({
+         responsive: true,
+         language: {
+           searchPlaceholder: 'Search...',
+           sSearch: '',
+           lengthMenu: '_MENU_ items/page',
+         },
+         order: [[7, 'asc']],
+       });
+
+       // Select2
+       $('.dataTables_length select').select2({ minimumResultsForSearch: Infinity });
+
+     });
+   </script>
+  </body>
+</html>
